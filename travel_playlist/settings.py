@@ -129,3 +129,9 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Spotify Access Token
+SPOTIFY_ACCESS_TOKEN = os.getenv("SPOTIFY_ACCESS_TOKEN", "")
+
+# Default playlist to search, if not set the value corresponds to the "Top 50 brasil"
+DEFAULT_PLAYLIST_ID = os.getenv("DEFAULT_PLAYLIST_ID", "37i9dQZF1DX0FOF1IUWK1W")
