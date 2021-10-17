@@ -12,35 +12,82 @@
       <caption>Seleção de atrações turísticas</caption>
       <thead>
         <tr>
-          <th scope="col"></th>
-          <th scope="col">Cidade</th>
-          <th scope="col">Atração</th>
-          <th scope="col">Atração já Escolhida</th>
-          <th scope="col">Ação</th>
+          <th class="center" scope="col"></th>
+          <th class="center" scope="col">Cidade</th>
+          <th class="center" scope="col">Atração</th>
+          <th class="center" scope="col">Atração já Escolhida</th>
+          <th class="center" scope="col">Origem</th>
+          <th class="center" scope="col">Destino</th>
+          <th class="center" scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
         {% for attraction in object_list %}
           <tr>
             <th scope="row">{{ forloop.counter}}</th>
-            <td>{{attraction.city}}</td>
-            <td>{{attraction.name}}</td>
-            <td>
+            <td class="center">{{attraction.city}}</td>
+            <td class="center">{{attraction.name}}</td>
+            <td class="center">
                 {% if attraction.selected %}
                     <i class="bi bi-check-square" style="color:green"></i>
                 {% else %}
                     <i class="bi bi-x-lg" style="color:red"></i>
                 {% endif %}
             </td>
-            <td>
-                {% if attraction.selected %}
-                    <a href="#" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#removeAttractionModal">Retirar atração</a>
-                {% else %}
-                    <a href="#" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#selectAttractionModal">Selecionar atração</a>
-                {% endif %}
+            <td class="center">
+              {% if attraction.origin %}
+                  <i class="bi bi-check-square" style="color:green"></i>
+              {% else %}
+                  <i class="bi bi-x-lg" style="color:red"></i>
+              {% endif %}
             </td>
-
-
+            <td class="center">
+              {% if attraction.destination %}
+                  <i class="bi bi-check-square" style="color:green"></i>
+              {% else %}
+                  <i class="bi bi-x-lg" style="color:red"></i>
+              {% endif %}
+            </td>
+            <td class="center">
+              {% if attraction.selected %}
+                {% if enable_origin_selection or enable_destination_selection %}
+                    {% if enable_origin_selection and enable_destination_selection and not attraction.origin and not attraction.destination %}
+                      <a href="#" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#removeAttractionModal">Remover atração</a>
+                      <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                          origem & destino
+                        </button>
+                          <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#SelectAttractionOriginModal">Selecionar como origem</a></li>
+                              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#SelectAttractionDestinationModal">Selecionar como destino</a></li>
+                          </ul>
+                      </div>
+                    {% elif attraction.origin and not enable_origin_selection %}
+                      <div class="btn-group" role="group">
+                        <a class="btn btn-outline-warning" href="#" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#RemoveAttractionOriginModal">Remover como origem</a>
+                      </div>
+                    {% elif attraction.destination and not enable_destination_selection %}
+                      <div class="btn-group" role="group">
+                        <a class="btn btn-outline-warning" href="#" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#RemoveAttractionDestinationModal">Remover como destino</a>
+                      </div>
+                    {% elif not attraction.destination and enable_destination_selection %}
+                      <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#SelectAttractionDestinationModal">Selecionar como destino</a>
+                    {% elif not attraction.origin and enable_origin_selection %}
+                      <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#SelectAttractionOriginModal">Selecionar como origem</a>
+                    {% endif %}
+                {% else %}
+                  {% if attraction.origin %}
+                    <a href="#" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#RemoveAttractionOriginModal">Remover como origem</a>
+                  {% elif attraction.destination %}
+                    <a class="btn btn-outline-warning" href="#" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#RemoveAttractionDestinationModal">Remover como destino</a>
+                  {% else %}
+                    <a href="#" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#removeAttractionModal">Remover atração</a>
+                  {% endif %}
+                {% endif %}
+              {% else %}
+                <a href="#" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#selectAttractionModal">Selecionar atração</a>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>
@@ -52,7 +99,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="selectAttractionModalLabel">New message</h5>
+          <h5 class="modal-title" id="selectAttractionModalLabel">Selecionar atração</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -78,6 +125,78 @@
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
             <button type="button" class="btn btn-primary cancel">Retirar Atração</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal select attraction origin -->
+  <div class="modal fade" id="SelectAttractionOriginModal" tabindex="-1" aria-labelledby="SelectAttractionOriginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="SelectAttractionOriginModalLabel">Selecionar atração como origem</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-primary confirm-origin">Selecionar atração como origem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal remove attraction origin -->
+  <div class="modal fade" id="RemoveAttractionOriginModal" tabindex="-1" aria-labelledby="RemoveAttractionOriginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="RemoveAttractionOriginModalLabel">Remover atração como origem</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-primary cancel-origin">Remover atração como origem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal select attraction destination -->
+  <div class="modal fade" id="SelectAttractionDestinationModal" tabindex="-1" aria-labelledby="SelectAttractionDestinationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="SelectAttractionDestinationModalLabel">Selecionar atração como destino</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-primary confirm-destination">Selecionar atração como destino</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal remove attraction destination -->
+  <div class="modal fade" id="RemoveAttractionDestinationModal" tabindex="-1" aria-labelledby="RemoveAttractionDestinationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="RemoveAttractionDestinationModalLabel">Remover atração como destino</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-primary cancel-destination">Remover atração como destino</button>
         </div>
       </div>
     </div>

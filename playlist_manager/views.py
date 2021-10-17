@@ -1,4 +1,6 @@
+from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView
+
 from playlist_manager.models import TouristAttraction
 
 
@@ -8,19 +10,49 @@ class HomePageView(TemplateView):
 
 class AttractionListView(ListView):
     template_name = "attraction_list.html"
-    category = None
     paginate_by = 6
-    queryset = TouristAttraction.objects.all().order_by('-selected')
+    queryset = TouristAttraction.objects.all().order_by('-selected', '-origin', '-destination')
 
-    #def get_queryset(self):
-    #    return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["enable_origin_selection"] = not TouristAttraction.objects.filter(origin=True).exists()
+        context["enable_destination_selection"] = not TouristAttraction.objects.filter(destination=True).exists()
+        return context
 
-    #def get_context_data(self, **kwargs):
-    #    context = super().get_context_data(**kwargs)
-    #    ordering_criteria = ["nome", "popularidade", "duração", "artistas"]
-    #    context["ordering_criteria"] = ordering_criteria
-    #    if "ordering" in self.request.GET and self.request.GET["ordering"] in ["nome", "popularidade", "duração", "artistas"]:
-    #        context["ordering"] = self.request.GET["ordering"]
-    #    else:
-    #        context["ordering"] = "popularidade"
-    #    return context
+
+def remove_attraction(request, pk):
+    attraction = TouristAttraction.objects.get(pk=pk)
+    attraction.selected = False
+    attraction.save()
+    return redirect('/attractions')
+
+
+def select_attraction(request, pk):
+    attraction = TouristAttraction.objects.get(pk=pk)
+    attraction.selected = True
+    attraction.save()
+    return redirect('/attractions')
+
+def select_attraction_origin(request, pk):
+    attraction = TouristAttraction.objects.get(pk=pk)
+    attraction.origin = True
+    attraction.save()
+    return redirect('/attractions')
+
+def remove_attraction_origin(request, pk):
+    attraction = TouristAttraction.objects.get(pk=pk)
+    attraction.origin = False
+    attraction.save()
+    return redirect('/attractions')
+
+def select_attraction_destination(request, pk):
+    attraction = TouristAttraction.objects.get(pk=pk)
+    attraction.destination = True
+    attraction.save()
+    return redirect('/attractions')
+
+def remove_attraction_destination(request, pk):
+    attraction = TouristAttraction.objects.get(pk=pk)
+    attraction.destination = False
+    attraction.save()
+    return redirect('/attractions')
