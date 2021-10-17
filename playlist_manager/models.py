@@ -20,3 +20,15 @@ class Track(models.Model):
 
     def __str__(self):
         return self.name
+
+class TouristAttraction(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    city = models.CharField(max_length=100)
+    latitude = models.CharField(max_length=100)
+    longitude = models.CharField(max_length=100)
+    selected = models.BooleanField(default=False)
+    origin = models.BooleanField(default=False)
+    destination = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+{% endblock head %}
+
+
+{% block content %}
+  <div class="container my-3">
+    <table class="table caption-top">
+      <caption>Seleção de atrações turísticas</caption>
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">Cidade</th>
+          <th scope="col">Atração</th>
+          <th scope="col">Atração já Escolhida</th>
+          <th scope="col">Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for attraction in object_list %}
+          <tr>
+            <th scope="row">{{ forloop.counter}}</th>
+            <td>{{attraction.city}}</td>
+            <td>{{attraction.name}}</td>
+            <td>
+                {% if attraction.selected %}
+                    <i class="bi bi-check-square" style="color:green"></i>
+                {% else %}
+                    <i class="bi bi-x-lg" style="color:red"></i>
+                {% endif %}
+            </td>
+            <td>
+                {% if attraction.selected %}
+                    <a href="#" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#removeAttractionModal">Retirar atração</a>
+                {% else %}
+                    <a href="#" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-attraction-id="{{attraction.id}}" data-bs-attraction-name="{{attraction.name}}" data-bs-target="#selectAttractionModal">Selecionar atração</a>
+                {% endif %}
+            </td>
+
+
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal select attraction -->
+  <div class="modal fade" id="selectAttractionModal" tabindex="-1" aria-labelledby="selectAttractionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="selectAttractionModalLabel">New message</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-primary confirm">Selecionar Atração</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal remove attraction -->
+  <div class="modal fade" id="removeAttractionModal" tabindex="-1" aria-labelledby="removeAttractionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="removeAttractionModalLabel">Remover atração</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-primary cancel">Retirar Atração</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block script %}
+  <script type="text/javascript" src="{% static 'list_attractions.js' %}"></script>
+{% endblock script %}
