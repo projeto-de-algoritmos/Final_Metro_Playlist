@@ -10,7 +10,7 @@ class HomePageView(TemplateView):
 
 class AttractionListView(ListView):
     template_name = "attraction_list.html"
-    paginate_by = 6
+    paginate_by = 10
     queryset = TouristAttraction.objects.all().order_by('-selected', '-origin', '-destination')
 
     def get_context_data(self, **kwargs):
