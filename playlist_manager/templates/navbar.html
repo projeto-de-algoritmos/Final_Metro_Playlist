@@ -3,7 +3,7 @@
 <nav class="navbar navbar-expand-sm py-3 border-bottom navbar-light">
     <div class="container">
         <a href="{% url 'home' %}" class="navbar-brand">
-            <span class="font-weight-bold h3">Home</span>
+            <span class="font-weight-bold h3">Início</span>
         </a>
 
         <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
@@ -13,6 +13,9 @@
             <ul class="navbar-nav">
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'attraction-list' %}">Atrações turísticas</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'track-list' %}">Playlist</a>
               </li>
             </ul>
         </div>
