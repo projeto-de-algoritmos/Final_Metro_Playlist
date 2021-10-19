@@ -11,14 +11,6 @@ def dijkstra(graph, source, destination):
         for node in graph
     }
 
-    node_data = {
-        "A": {"cost": inf, "pred": []},
-        "B": {"cost": inf, "pred": []},
-        "C": {"cost": inf, "pred": []},
-        "D": {"cost": inf, "pred": []},
-        "E": {"cost": inf, "pred": []},
-        "F": {"cost": inf, "pred": []},
-    }
     node_data[source]["cost"] = 0
 
     visited = []
@@ -36,7 +28,7 @@ def dijkstra(graph, source, destination):
 
                     if cost < node_data[neighbour]["cost"]:
                         node_data[neighbour]["cost"] = cost
-                        node_data[neighbour]["pred"] = node_data[temp_source]["pred"] + list(temp_source)
+                        node_data[neighbour]["pred"] = node_data[temp_source]["pred"] + [temp_source]
 
                     heappush(
                         min_heap,
@@ -47,7 +39,7 @@ def dijkstra(graph, source, destination):
         _, temp_source = min_heap[0] # Tuple containing cost and node (cost, node)
 
     print(f"Shortest distance: {node_data[destination]['cost']}")
-    print(f"Shortest path: {node_data[destination]['pred'] + list(destination)}")
+    print(f"Shortest path: {node_data[destination]['pred'] + [destination]}")
 
 
 def knapsack(capacity, weights, values): 

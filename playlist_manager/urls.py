@@ -15,4 +15,6 @@ urlpatterns = [
     
     path('attractions/select-destination/<str:pk>/', views.select_attraction_destination, name='select_attraction_destination'),
     path('attractions/remove-destination/<str:pk>/', views.remove_attraction_destination, name='remove_attraction_destination'),
+
+    path('results/', views.result_view, name='results')
 ]

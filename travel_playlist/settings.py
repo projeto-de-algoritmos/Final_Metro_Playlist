@@ -139,3 +139,9 @@ SPOTIFY_ACCESS_TOKEN = os.getenv("SPOTIFY_ACCESS_TOKEN", "")
 
 # Default playlist to search, if not set the value corresponds to the "Top 50 brasil"
 DEFAULT_PLAYLIST_ID = os.getenv("DEFAULT_PLAYLIST_ID", "37i9dQZF1DX0FOF1IUWK1W")
+
+# Map box Env var
+MAPBOX_API_KEY = os.getenv(
+    'MAPBOX_API_KEY',
+    ''
+)
