@@ -18,24 +18,7 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-sm py-3 border-bottom navbar-light">
-        <div class="container">
-            <a href="{% url 'home' %}" class="navbar-brand">
-                <span class="font-weight-bold h3">Home</span>
-            </a>
-
-            <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"> </span>
-            </button>
-            <!--<div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link lead mr-4 font-weight-bold">Músicas</a>
-                    </li>
-                </ul>
-            </div>-->
-        </div>
-    </nav>
+    {% include 'navbar.html' %}
 
     {% block content %}
     {% endblock content %}
