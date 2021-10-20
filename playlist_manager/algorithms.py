@@ -48,7 +48,58 @@ def dijkstra(graph, source, destination):
     return shortest_distance, shortest_path
 
 
-def knapsack(capacity, weights, values): 
+def print_selected_items(dp, weights, capacity):
+    idxes_list = []
+    print("Selected weights are: ", end='')
+    n = len(weights)
+    i = n - 1
+    while i >= 0 and capacity >= 0:
+        if i > 0 and dp[i][capacity] != dp[i - 1][capacity]:
+            # include this item
+            idxes_list.append(i)
+            capacity -= weights[i]
+        elif i == 0 and capacity >= weights[i]:
+            # include this item
+            idxes_list.append(i)
+            capacity -= weights[i]
+        else:
+            i -= 1
+    weights = [weights[idx] for idx in idxes_list]
+    print(weights)
+    return weights
+
+
+def knapsack(profits, weights, capacity):
+    """
+    :param profits:
+    :param weights:
+    :param capacity:
+    :return:
+    """
+    n = len(profits)
+
+    print(len(weights))
+    # base checks
+    if capacity <= 0 or n == 0 or len(weights) != n:
+        return 0
+    dp = [[-1 for _ in range(capacity + 1)] for _ in range(n)]
+    # populate the capacity=0 columns
+    for i in range(n):
+        dp[i][0] = 0
+    # process all sub-arrays for all capacities
+    for i in range(n):
+        for c in range(1, capacity + 1):
+            profit1, profit2 = 0, 0
+            if weights[i] <= c:
+                profit1 = profits[i] + dp[i][c - weights[i]]
+            if i > 0:
+                profit2 = dp[i - 1][c]
+            dp[i][c] = max(profit1, profit2)
+    # maximum profit will be in the bottom-right corner.
+    print_selected_items(dp, weights, capacity)
+    return dp[n - 1][capacity]
+
+def old_knapsack(capacity, weights, values): 
     w, h = capacity + 1, len(values)
     table = [
         [0 for _ in range(w)] for _ in range(h)
@@ -70,25 +121,6 @@ def knapsack(capacity, weights, values):
 
     return table
 
-def print_selected_items(dp, weights, capacity):
-    idxes_list = []
-    print("Selected weights are: ", end='')
-    n = len(weights)
-    i = n - 1
-    while i >= 0 and capacity >= 0:
-        if i > 0 and dp[i][capacity] != dp[i - 1][capacity]:
-            # include this item
-            idxes_list.append(i)
-            capacity -= weights[i]
-        elif i == 0 and capacity >= weights[i]:
-            # include this item
-            idxes_list.append(i)
-            capacity -= weights[i]
-        else:
-            i -= 1
-    weights = [weights[idx] for idx in idxes_list]
-    print(weights)
-    return weights
 
 def chunks(l, n):
     n = max(1, n)
@@ -134,6 +166,7 @@ if __name__ == "__main__":
     #weights = [1,3,4,5]
     #capacity = 5
 #
+    # https://stackoverflow.com/questions/57903012/printing-items-selected-from-knapsack-unbounded-algorithm
     #res = knapsack(capacity, weights, values)
 #
     #print_selected_items(res, weights, capacity)

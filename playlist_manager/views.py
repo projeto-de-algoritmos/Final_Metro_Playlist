@@ -14,7 +14,7 @@ from matplotlib.pyplot import figure as plt_figure
 from playlist_manager.models import TouristAttraction, Track, Graph
 from playlist_manager.constants import ORDERING_CRITERIA_DICT
 from playlist_manager.mapbox_client import MapboxClient
-from playlist_manager.algorithms import dijkstra, chunks
+from playlist_manager.algorithms import dijkstra, knapsack, old_knapsack, print_selected_items, chunks
 
 
 class HomePageView(TemplateView):
@@ -97,6 +97,16 @@ def result_view(request):
             destination=destination.name
         ).first()
         if existing_graph:
+            tracks = Track.objects.all()[:20].values_list('duration', 'popularity')
+            tracks_durations, tracks_popularities = zip(*tracks)
+            capacity = int(existing_graph.duration) * 1000 # convert seconds to miliseconsd
+
+            print(capacity, tracks_durations, tracks_popularities)
+
+            knapsack(tracks_popularities, tracks_durations, capacity)
+            res = old_knapsack(capacity, tracks_durations, tracks_popularities)
+            print_selected_items(res, tracks_durations, capacity)
+
             return render(
                 request,
                 'results.html',
