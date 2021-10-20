@@ -1,12 +1,20 @@
-from collections import defaultdict
+import io
 
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.generic import TemplateView, ListView
+from django.contrib import messages
+from django.core.files.images import ImageFile
 
-from playlist_manager.models import TouristAttraction, Track
+
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure as plt_figure
+
+from playlist_manager.models import TouristAttraction, Track, Graph
 from playlist_manager.constants import ORDERING_CRITERIA_DICT
 from playlist_manager.mapbox_client import MapboxClient
-from playlist_manager.algorithms import dijkstra
+from playlist_manager.algorithms import dijkstra, chunks
 
 
 class HomePageView(TemplateView):
@@ -63,8 +71,18 @@ def remove_attraction_destination(request, pk):
 
 def result_view(request):
     attractions = TouristAttraction.objects.filter(selected=True)
+    origin = attractions.filter(origin=True).first()
+    destination = attractions.filter(destination=True).first()
+
+    if not origin or not destination:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'É necessário selecionar os pontos de origem e destino para visualizar os resultados'
+        )
+        return redirect(reverse('attraction-list'))
+
     coords = []
-    #names = []
     if attractions and attractions.count() > 1:
         for attraction in attractions:
             coords.append(
@@ -85,15 +103,48 @@ def result_view(request):
                         [neighbour_lat, neighbour_lng]
                     )
                     graph[source_name][neighbour_name] = weight
-        print(
-            graph
+
+        print(graph)
+        duration, shortest_path = dijkstra(graph, origin.name, destination.name)
+
+        new_graph = {}
+
+        for node in graph:
+            new_graph[node] = {}
+            for neighbour in graph[node]:
+                new_graph[node][neighbour] = {'weight': graph[node][neighbour]}
+
+        nx_graph = nx.from_dict_of_dicts(new_graph)
+        pos = nx.spring_layout(nx_graph)
+        labels = nx.get_edge_attributes(nx_graph, 'weight')
+        shortest_path_chunks = chunks(shortest_path, 2)
+        edge_colors = ['red' if set(edge) in shortest_path_chunks else 'black' for edge in nx_graph.edges]
+
+        plt.figure(figsize=(7, 5,)) # Size in inches
+        nx.draw_networkx(
+            nx_graph,
+            pos,
+            node_size=[len(graph[node])*300 for node in graph],
+            font_size=6,
+            edge_color=edge_colors
         )
-        dijkstra(graph, coords[0][2], coords[-1][2])
+        nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=labels, font_size=6)
+
+        figure = io.BytesIO()
+
+        plt.savefig(figure, format="png")
+        file_content = ImageFile(figure)
+        graph = Graph()
+        graph.image.save('graph.png', file_content)
+        graph.save()
 
     return render(
         request,
         'results.html',
-        {'coords':coords}
+        {
+            'coords':coords,
+            'graph':graph
+        }
     )
 
 class TrackListView(ListView):

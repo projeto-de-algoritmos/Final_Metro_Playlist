@@ -1,6 +1,9 @@
 import math
 from heapq import heapify, heappush
 
+import networkx as nx
+import matplotlib.pyplot as plt
+
 
 def dijkstra(graph, source, destination):
     inf = math.inf
@@ -40,6 +43,9 @@ def dijkstra(graph, source, destination):
 
     print(f"Shortest distance: {node_data[destination]['cost']}")
     print(f"Shortest path: {node_data[destination]['pred'] + [destination]}")
+    shortest_distance = node_data[destination]['cost']
+    shortest_path = node_data[destination]['pred'] + [destination]
+    return shortest_distance, shortest_path
 
 
 def knapsack(capacity, weights, values): 
@@ -84,22 +90,50 @@ def print_selected_items(dp, weights, capacity):
     print(weights)
     return weights
 
+def chunks(l, n):
+    n = max(1, n)
+    return list((set(l[i:i+n]) for i in range(0, len(l), n)))
+
 if __name__ == "__main__":
     graph = {
-        "A": {"B": 20, "C": 40},
-        "B": {"A": 20, "C": 30, "D": 80},
-        "C": {"A": 40, "B": 30, "E": 50, "D": 20},
-        "D": {"B": 80, "C": 20, "E": 110, "F": 220},
-        "E": {"C": 50, "D": 110, "F": 10},
-        "F": {"D": 220, "E": 10},
+        'Manhattan': {
+            'Washington': 2292.089,
+            'Roosevelt is': 1603.554,
+            'Grand': 1310.103,
+            'Cropsey': 1870.891
+        },
+        'Washington': {
+            'Manhattan': 1888.44,
+            'Roosevelt is': 1300.956,
+            'Grand': 1662.496,
+            'Cropsey': 2809.858
+        },
+        'Roosevelt is': {
+            'Manhattan': 1699.934,
+            'Washington': 1819.653,
+            'Grand': 1282.234,
+            'Cropsey': 2769.109
+        },
+        'Grand': {
+            'Manhattan': 1273.837,
+            'Washington': 2024.26,
+            'Roosevelt is': 1290.025,
+            'Cropsey': 2498.591
+        },
+        'Cropsey': {
+            'Manhattan': 1770.744,
+            'Washington': 3018.751,
+            'Roosevelt is': 2585.918,
+            'Grand': 2400.92
+        }
     }
-    dijkstra(graph, "A", "F")
+    shortest_distance, shortest_path = dijkstra(graph, "Manhattan", "Roosevelt is")
 
 
-    values = [1,4,5,7]
-    weights = [1,3,4,5]
-    capacity = 5
-
-    res = knapsack(capacity, weights, values)
-
-    print_selected_items(res, weights, capacity)
+    #values = [1,4,5,7]
+    #weights = [1,3,4,5]
+    #capacity = 5
+#
+    #res = knapsack(capacity, weights, values)
+#
+    #print_selected_items(res, weights, capacity)

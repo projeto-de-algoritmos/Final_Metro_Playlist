@@ -1,6 +1,9 @@
 from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
 
 from playlist_manager import views
+
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home"),
@@ -17,4 +20,4 @@ urlpatterns = [
     path('attractions/remove-destination/<str:pk>/', views.remove_attraction_destination, name='remove_attraction_destination'),
 
     path('results/', views.result_view, name='results')
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

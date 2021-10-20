@@ -20,6 +20,16 @@
 <body class="d-flex flex-column min-vh-100">
     {% include 'navbar.html' %}
 
+    {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+            <div class="container my-3 alert alert-danger" role="alert">
+                {{message}}
+            </div>
+        {% else %}
+            {{ message }}
+        {% endif %}
+    {% endfor %}
+
     {% block content %}
     {% endblock content %}
 

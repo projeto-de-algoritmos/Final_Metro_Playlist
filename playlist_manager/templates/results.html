@@ -3,8 +3,22 @@
 {% block content %}
 
 <div class="container my-3">
-    <h1 class="font-weight-bold">Resultados</h1>
-    <p>{{coords}}</p>
+    <div class="row">
+        <div class="col">
+            <h2 class="font-weight-bold"> Menor caminho das atrações turísticas</h2>
+            <div class="card" style="width: 50rem;">
+                <img src="{{ graph.image.url }}">
+                <div class="card-body">
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col order-5">
+            <h2 class="font-weight-bold"> Playlist</h2>
+            <p>blablabla</p>
+        </div>
+
+    </div>
 </div>
 
 {% endblock content %}
