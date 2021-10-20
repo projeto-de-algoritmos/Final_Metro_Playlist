@@ -84,9 +84,25 @@ def result_view(request):
 
     coords = []
     if attractions and attractions.count() > 1:
+        nodes = []
         for attraction in attractions:
             coords.append(
                 [float(attraction.latitude), float(attraction.longitude), attraction.name]
+            )
+            nodes.append(attraction.name)
+
+        existing_graph = Graph.objects.filter(
+            nodes=nodes,
+            origin=origin.name,
+            destination=destination.name
+        ).first()
+        if existing_graph:
+            return render(
+                request,
+                'results.html',
+                {
+                    'graph': existing_graph
+                }
             )
 
         graph = {}
@@ -134,7 +150,13 @@ def result_view(request):
 
         plt.savefig(figure, format="png")
         file_content = ImageFile(figure)
-        graph = Graph()
+        graph = Graph(
+            nodes = nodes,
+            origin = origin.name,
+            destination = destination.name,
+            path=shortest_path,
+            duration=duration
+        )
         graph.image.save('graph.png', file_content)
         graph.save()
 

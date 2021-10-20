@@ -1,5 +1,7 @@
-from django.db import models
 from datetime import datetime
+
+from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class Playlist(models.Model):
@@ -44,3 +46,8 @@ class TouristAttraction(models.Model):
 
 class Graph(models.Model):
     image = models.ImageField(upload_to ='graphs/', null=True)
+    origin = models.CharField(max_length=100, default='')
+    destination = models.CharField(max_length=100, default='')
+    nodes = ArrayField(models.CharField(max_length=100), default=list)
+    path = ArrayField(models.CharField(max_length=100), default=list)
+    duration = models.FloatField(default=0)
