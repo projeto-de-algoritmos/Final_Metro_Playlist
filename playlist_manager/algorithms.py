@@ -41,16 +41,14 @@ def dijkstra(graph, source, destination):
         heapify(min_heap)
         _, temp_source = min_heap[0] # Tuple containing cost and node (cost, node)
 
-    print(f"Shortest distance: {node_data[destination]['cost']}")
-    print(f"Shortest path: {node_data[destination]['pred'] + [destination]}")
     shortest_distance = node_data[destination]['cost']
     shortest_path = node_data[destination]['pred'] + [destination]
     return shortest_distance, shortest_path
 
 
-def print_selected_items(dp, weights, capacity):
+def get_selected_tracks(dp, weights, capacity):
     idxes_list = []
-    print("Selected weights are: ", end='')
+
     n = len(weights)
     i = n - 1
     while i >= 0 and capacity >= 0:
@@ -65,41 +63,11 @@ def print_selected_items(dp, weights, capacity):
         else:
             i -= 1
     weights = [weights[idx] for idx in idxes_list]
-    print(weights)
+
     return weights
 
 
-def knapsack(profits, weights, capacity):
-    """
-    :param profits:
-    :param weights:
-    :param capacity:
-    :return:
-    """
-    n = len(profits)
-
-    print(len(weights))
-    # base checks
-    if capacity <= 0 or n == 0 or len(weights) != n:
-        return 0
-    dp = [[-1 for _ in range(capacity + 1)] for _ in range(n)]
-    # populate the capacity=0 columns
-    for i in range(n):
-        dp[i][0] = 0
-    # process all sub-arrays for all capacities
-    for i in range(n):
-        for c in range(1, capacity + 1):
-            profit1, profit2 = 0, 0
-            if weights[i] <= c:
-                profit1 = profits[i] + dp[i][c - weights[i]]
-            if i > 0:
-                profit2 = dp[i - 1][c]
-            dp[i][c] = max(profit1, profit2)
-    # maximum profit will be in the bottom-right corner.
-    print_selected_items(dp, weights, capacity)
-    return dp[n - 1][capacity]
-
-def old_knapsack(capacity, weights, values): 
+def knapsack(capacity, weights, values): 
     w, h = capacity + 1, len(values)
     table = [
         [0 for _ in range(w)] for _ in range(h)
@@ -120,53 +88,3 @@ def old_knapsack(capacity, weights, values):
             table[index][weight] = max(prior_value, new_option_best)
 
     return table
-
-
-def chunks(l, n):
-    n = max(1, n)
-    return list((set(l[i:i+n]) for i in range(0, len(l), n)))
-
-if __name__ == "__main__":
-    graph = {
-        'Manhattan': {
-            'Washington': 2292.089,
-            'Roosevelt is': 1603.554,
-            'Grand': 1310.103,
-            'Cropsey': 1870.891
-        },
-        'Washington': {
-            'Manhattan': 1888.44,
-            'Roosevelt is': 1300.956,
-            'Grand': 1662.496,
-            'Cropsey': 2809.858
-        },
-        'Roosevelt is': {
-            'Manhattan': 1699.934,
-            'Washington': 1819.653,
-            'Grand': 1282.234,
-            'Cropsey': 2769.109
-        },
-        'Grand': {
-            'Manhattan': 1273.837,
-            'Washington': 2024.26,
-            'Roosevelt is': 1290.025,
-            'Cropsey': 2498.591
-        },
-        'Cropsey': {
-            'Manhattan': 1770.744,
-            'Washington': 3018.751,
-            'Roosevelt is': 2585.918,
-            'Grand': 2400.92
-        }
-    }
-    shortest_distance, shortest_path = dijkstra(graph, "Manhattan", "Roosevelt is")
-
-
-    #values = [1,4,5,7]
-    #weights = [1,3,4,5]
-    #capacity = 5
-#
-    # https://stackoverflow.com/questions/57903012/printing-items-selected-from-knapsack-unbounded-algorithm
-    #res = knapsack(capacity, weights, values)
-#
-    #print_selected_items(res, weights, capacity)

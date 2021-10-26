@@ -9,13 +9,25 @@
             <div class="card" style="width: 50rem;">
                 <img src="{{ graph.image.url }}">
                 <div class="card-body">
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <p class="card-text">
+                        O Percurso entre <strong>{{graph.origin}}</strong> e 
+                        <strong>{{graph.origin}}</strong> leva <strong>{{graph.duration_formatted}}</strong>
+                    </p>
                 </div>
             </div>
         </div>
         <div class="col order-5">
-            <h2 class="font-weight-bold"> Playlist</h2>
-            <p>blablabla</p>
+            <h2 class="font-weight-bold"> Músicas ouvidas na playlist</h2>
+            <ul>
+                {% for track in tracks %}
+                    <li>
+                        <strong>{{track.name}}</strong>: 
+                        Com duração <strong>{{track.duration}}</strong> e 
+                        popularidade <strong>{{track.popularity}}</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+            <p>Com as músicas totalizando uma duração de <strong>{{tracks_total_duration}}</strong></p>
         </div>
 
     </div>

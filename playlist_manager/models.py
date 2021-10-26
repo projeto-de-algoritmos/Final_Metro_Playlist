@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -51,3 +51,8 @@ class Graph(models.Model):
     nodes = ArrayField(models.CharField(max_length=100), default=list)
     path = ArrayField(models.CharField(max_length=100), default=list)
     duration = models.FloatField(default=0)
+
+    @property
+    def duration_formatted(self):
+        minutes_str = str(timedelta(seconds=self.duration)).split(':', 1)[1]
+        return minutes_str[:5]

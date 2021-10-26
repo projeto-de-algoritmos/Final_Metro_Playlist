@@ -12,7 +12,6 @@
       <caption>Seleção de atrações turísticas</caption>
       <thead>
         <tr>
-          <th class="center" scope="col"></th>
           <th class="center" scope="col">Cidade</th>
           <th class="center" scope="col">Atração</th>
           <th class="center" scope="col">Atração já Escolhida</th>
@@ -24,7 +23,6 @@
       <tbody>
         {% for attraction in object_list %}
           <tr>
-            <th scope="row">{{ forloop.counter}}</th>
             <td class="center">{{attraction.city}}</td>
             <td class="center">{{attraction.name}}</td>
             <td class="center">

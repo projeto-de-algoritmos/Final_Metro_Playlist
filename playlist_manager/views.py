@@ -1,20 +1,13 @@
-import io
-
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import TemplateView, ListView
 from django.contrib import messages
-from django.core.files.images import ImageFile
 
-
-import networkx as nx
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure as plt_figure
 
 from playlist_manager.models import TouristAttraction, Track, Graph
 from playlist_manager.constants import ORDERING_CRITERIA_DICT
-from playlist_manager.mapbox_client import MapboxClient
-from playlist_manager.algorithms import dijkstra, knapsack, old_knapsack, print_selected_items, chunks
+from playlist_manager.algorithms import dijkstra, knapsack, get_selected_tracks
+from playlist_manager.utils import build_graph, draw_graph, format_selected_tracks
 
 
 class HomePageView(TemplateView):
@@ -32,43 +25,7 @@ class AttractionListView(ListView):
         context["enable_destination_selection"] = not TouristAttraction.objects.filter(destination=True).exists()
         return context
 
-def remove_attraction(request, pk):
-    attraction = TouristAttraction.objects.get(pk=pk)
-    attraction.selected = False
-    attraction.save()
-    return redirect('/attractions')
-
-
-def select_attraction(request, pk):
-    attraction = TouristAttraction.objects.get(pk=pk)
-    attraction.selected = True
-    attraction.save()
-    return redirect('/attractions')
-
-def select_attraction_origin(request, pk):
-    attraction = TouristAttraction.objects.get(pk=pk)
-    attraction.origin = True
-    attraction.save()
-    return redirect('/attractions')
-
-def remove_attraction_origin(request, pk):
-    attraction = TouristAttraction.objects.get(pk=pk)
-    attraction.origin = False
-    attraction.save()
-    return redirect('/attractions')
-
-def select_attraction_destination(request, pk):
-    attraction = TouristAttraction.objects.get(pk=pk)
-    attraction.destination = True
-    attraction.save()
-    return redirect('/attractions')
-
-def remove_attraction_destination(request, pk):
-    attraction = TouristAttraction.objects.get(pk=pk)
-    attraction.destination = False
-    attraction.save()
-    return redirect('/attractions')
-
+    
 def result_view(request):
     attractions = TouristAttraction.objects.filter(selected=True)
     origin = attractions.filter(origin=True).first()
@@ -82,8 +39,8 @@ def result_view(request):
         )
         return redirect(reverse('attraction-list'))
 
-    coords = []
-    if attractions and attractions.count() > 1:
+    if attractions and attractions.count() > 2:
+        coords = []
         nodes = []
         for attraction in attractions:
             coords.append(
@@ -91,93 +48,49 @@ def result_view(request):
             )
             nodes.append(attraction.name)
 
-        existing_graph = Graph.objects.filter(
+        graph_db_obj = Graph.objects.filter(
             nodes=nodes,
             origin=origin.name,
             destination=destination.name
         ).first()
-        if existing_graph:
-            tracks = Track.objects.all()[:20].values_list('duration', 'popularity')
-            tracks_durations, tracks_popularities = zip(*tracks)
-            capacity = int(existing_graph.duration) * 1000 # convert seconds to miliseconsd
 
-            print(capacity, tracks_durations, tracks_popularities)
+        tracks = Track.objects.all().values_list('duration', 'popularity')
+        tracks_durations, tracks_popularities = zip(*tracks)
 
-            knapsack(tracks_popularities, tracks_durations, capacity)
-            res = old_knapsack(capacity, tracks_durations, tracks_popularities)
-            print_selected_items(res, tracks_durations, capacity)
+        if graph_db_obj:
+            capacity = int(graph_db_obj.duration) * 1000 # convert seconds to miliseconsd
 
-            return render(
-                request,
-                'results.html',
-                {
-                    'graph': existing_graph
-                }
+            formatted_tracks = []
+            formatted_tracks, tracks_total_duration = format_selected_tracks(
+                capacity, tracks_durations, tracks_popularities
+            )    
+        else:
+            graph = build_graph(coords)
+            duration, shortest_path = dijkstra(graph, origin.name, destination.name)
+            
+            graph_db_obj = draw_graph(graph, shortest_path, nodes, origin, destination, duration)
+            capacity = int(graph_db_obj.duration) * 1000 # convert seconds to miliseconsd
+
+            formatted_tracks, tracks_total_duration = format_selected_tracks(
+                capacity, tracks_durations, tracks_popularities
             )
 
-        graph = {}
-        mapbox_client = MapboxClient()
-        for source in coords:
-            source_lat, source_lng, source_name = source
-            graph[source_name] = {}
-            for neighbour in coords:
-                neighbour_lat, neighbour_lng, neighbour_name = neighbour
-
-                if neighbour != source:
-                    weight = mapbox_client.duration_between_coords(
-                        [source_lat, source_lng],
-                        [neighbour_lat, neighbour_lng]
-                    )
-                    graph[source_name][neighbour_name] = weight
-
-        print(graph)
-        duration, shortest_path = dijkstra(graph, origin.name, destination.name)
-
-        new_graph = {}
-
-        for node in graph:
-            new_graph[node] = {}
-            for neighbour in graph[node]:
-                new_graph[node][neighbour] = {'weight': graph[node][neighbour]}
-
-        nx_graph = nx.from_dict_of_dicts(new_graph)
-        pos = nx.spring_layout(nx_graph)
-        labels = nx.get_edge_attributes(nx_graph, 'weight')
-        shortest_path_chunks = chunks(shortest_path, 2)
-        edge_colors = ['red' if set(edge) in shortest_path_chunks else 'black' for edge in nx_graph.edges]
-
-        plt.figure(figsize=(7, 5,)) # Size in inches
-        nx.draw_networkx(
-            nx_graph,
-            pos,
-            node_size=[len(graph[node])*300 for node in graph],
-            font_size=6,
-            edge_color=edge_colors
+        return render(
+            request,
+            'results.html',
+            {
+                'graph': graph_db_obj,
+                'tracks': formatted_tracks,
+                'tracks_total_duration': tracks_total_duration
+            }
         )
-        nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=labels, font_size=6)
-
-        figure = io.BytesIO()
-
-        plt.savefig(figure, format="png")
-        file_content = ImageFile(figure)
-        graph = Graph(
-            nodes = nodes,
-            origin = origin.name,
-            destination = destination.name,
-            path=shortest_path,
-            duration=duration
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'É necessário selecionar no mínimo 3 atrações turísticas'
         )
-        graph.image.save('graph.png', file_content)
-        graph.save()
-
-    return render(
-        request,
-        'results.html',
-        {
-            'coords':coords,
-            'graph':graph
-        }
-    )
+        return redirect(reverse('attraction-list'))
 
 class TrackListView(ListView):
     template_name = "track_list.html"
@@ -185,7 +98,8 @@ class TrackListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        if "ordering" in self.request.GET and self.request.GET["ordering"] in ["nome música", "popularidade", "duração", "artistas"]:
+        if "ordering" in self.request.GET and self.request.GET["ordering"] in [
+            "nome música", "popularidade", "duração", "artistas"]:
             ordering_criteria = self.request.GET["ordering"]
             queryset = Track.objects.all().order_by(ORDERING_CRITERIA_DICT[ordering_criteria])
             return queryset
@@ -197,7 +111,8 @@ class TrackListView(ListView):
         context = super().get_context_data(**kwargs)
         ordering_criteria = ["nome música", "popularidade", "duração", "artistas"]
         context["ordering_criteria"] = ordering_criteria
-        if "ordering" in self.request.GET and self.request.GET["ordering"] in ["nome música", "popularidade", "duração", "artistas"]:
+        if "ordering" in self.request.GET and self.request.GET["ordering"] in [
+            "nome música", "popularidade", "duração", "artistas"]:
             context["ordering"] = self.request.GET["ordering"]
         else:
             context["ordering"] = "popularidade"
